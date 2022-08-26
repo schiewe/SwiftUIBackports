@@ -34,6 +34,18 @@ extension Backport where Wrapped == Any {
         /// modifier may not always hide the dialog title, which is required on
         /// some platforms.
         case hidden
+
+        @available(iOS 15.0, *)
+        var map: SwiftUI.Visibility {
+            switch self {
+            case .automatic:
+                return .automatic
+            case .visible:
+                return .visible
+            case .hidden:
+                return .hidden
+            }
+        }
     }
 
 }
