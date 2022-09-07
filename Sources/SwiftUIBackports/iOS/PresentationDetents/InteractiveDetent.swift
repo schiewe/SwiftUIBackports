@@ -83,6 +83,7 @@ private extension Backport.Representable {
                         .init(rawValue: $0.rawValue)
                     }
                     controller.presentingViewController.view.tintAdjustmentMode = .normal
+                    controller.prefersScrollingExpandsWhenScrolledToEdge = false // TODO: expose this as separate modifier or arg (... is also set elsewhere so modifier order is important!)
                 }
             }
         }
