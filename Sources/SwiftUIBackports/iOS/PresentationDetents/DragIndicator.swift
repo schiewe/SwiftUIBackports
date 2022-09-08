@@ -27,7 +27,13 @@ public extension Backport where Wrapped: View {
     /// - Parameter visibility: The preferred visibility of the drag indicator.
     @ViewBuilder
     func presentationDragIndicator(_ visibility: Backport<Any>.Visibility) -> some View {
-        if #available(iOS 15, *) {
+        if #available(iOS 16, *) {
+            #if swift(>=5.7)
+            content.presentationDragIndicator(visibility.map)
+            #else
+            content
+            #endif
+        } else if #available(iOS 15, *) {
             content.background(Backport<Any>.Representable(visibility: visibility))
         } else {
             content

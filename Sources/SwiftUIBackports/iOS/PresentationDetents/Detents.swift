@@ -30,7 +30,13 @@ public extension Backport where Wrapped: View {
     @ViewBuilder
     func presentationDetents(_ detents: Set<Backport<Any>.PresentationDetent>) -> some View {
         #if os(iOS)
-        if #available(iOS 15, *) {
+        if #available(iOS 16, *) {
+            #if swift(>=5.7)
+            content.presentationDetents(Set(detents.map(\.map)))
+            #else
+            content
+            #endif
+        } else if #available(iOS 15, *) {
             content.background(Backport<Any>.Representable(detents: detents, selection: nil))
         } else {
             content
@@ -74,7 +80,13 @@ public extension Backport where Wrapped: View {
     @ViewBuilder
     func presentationDetents(_ detents: Set<Backport<Any>.PresentationDetent>, selection: Binding<Backport<Any>.PresentationDetent>) -> some View {
         #if os(iOS)
-        if #available(iOS 15, *) {
+        if #available(iOS 16, *) {
+            #if swift(>=5.7)
+            content.presentationDetents(Set(detents.map(\.map)), selection: selection.map)
+            #else
+            content
+            #endif
+        } else if #available(iOS 15, *) {
             content.background(Backport<Any>.Representable(detents: detents, selection: selection))
         } else {
             content
@@ -135,6 +147,32 @@ public extension Backport where Wrapped == Any {
                 return true
             }
         }
+
+        #if swift(>=5.7)
+        @available(iOS 16.0, *)
+        var map: SwiftUI.PresentationDetent {
+            get {
+                switch self {
+                case .large:
+                    return .large
+                case .medium:
+                    return .medium
+                default:
+                    fatalError("not implemented")
+                }
+            }
+            set {
+                switch newValue {
+                case SwiftUI.PresentationDetent.large:
+                    self = .large
+                case SwiftUI.PresentationDetent.medium:
+                    self = .medium
+                default:
+                    fatalError("not implemented")
+                }
+            }
+        }
+        #endif
     }
 }
 
