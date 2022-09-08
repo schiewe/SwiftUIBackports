@@ -30,7 +30,13 @@ public extension Backport where Wrapped: View {
     @ViewBuilder
     func presentationDetents(_ detents: Set<Backport<Any>.PresentationDetent>) -> some View {
         #if os(iOS)
-        if #available(iOS 15, *) {
+        if #available(iOS 16, *) {
+            #if swift(>=5.7)
+            content.presentationDetents(Set(detents.compactMap(\.map)))
+            #else
+            content
+            #endif
+        } else if #available(iOS 15, *) {
             content.background(Backport<Any>.Representable(detents: detents, selection: nil))
         } else {
             content
@@ -135,6 +141,20 @@ public extension Backport where Wrapped == Any {
                 return true
             }
         }
+
+        #if swift(>=5.7)
+        @available(iOS 16.0, *)
+        var map: SwiftUI.PresentationDetent? {
+            switch self {
+            case .large:
+                return .large
+            case .medium:
+                return .medium
+            default:
+                return nil
+            }
+        }
+        #endif
     }
 }
 
