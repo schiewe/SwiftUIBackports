@@ -84,7 +84,6 @@ private extension Backport.Representable {
             if let controller = parent?.sheetPresentationController {
                 controller.animateChanges {
                     controller.prefersGrabberVisible = visibility == .visible
-                    controller.prefersScrollingExpandsWhenScrolledToEdge = true
                 }
             }
         }
