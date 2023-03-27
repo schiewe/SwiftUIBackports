@@ -186,31 +186,53 @@ private extension Backport.Representable {
             self.detents = detents
             self.selection = selection
 
-            if let controller = parent?.sheetPresentationController {
-                controller.animateChanges {
-                    controller.detents = detents.sorted().map {
-                        switch $0 {
-                        case .medium:
-                            return .medium()
-                        default:
-                            return .large()
-                        }
-                    }
+            guard let controller = parent?.sheetPresentationController else {
+                return
+            }
 
-                    if let selection = selection {
-                        controller.selectedDetentIdentifier = .init(selection.wrappedValue.id.rawValue)
-                    }
+            let detents: [UISheetPresentationController.Detent] = detents.sorted().map {
+                switch $0 {
+                case .medium:
+                    return .medium()
+                default:
+                    return .large()
+                }
+            }
+            let selectedDetentIdentifier: UISheetPresentationController.Detent.Identifier? = {
+                if let selection = selection {
+                    return .init(selection.wrappedValue.id.rawValue)
+                } else {
+                    return nil
+                }
+            }()
+            let prefersScrollingExpandsWhenScrolledToEdge = true
+            let tintAdjustmentMode: UIView.TintAdjustmentMode = {
+                if let undimmed = controller.largestUndimmedDetentIdentifier {
+                    return (selection?.wrappedValue ?? .large) >= .init(id: .init(rawValue: undimmed.rawValue)) ? .automatic : .normal
+                } else {
+                    return .automatic
+                }
+            }()
 
-                    controller.prefersScrollingExpandsWhenScrolledToEdge = true
+            guard detents != controller.detents ||
+                    selectedDetentIdentifier != controller.selectedDetentIdentifier ||
+                    prefersScrollingExpandsWhenScrolledToEdge != controller.prefersScrollingExpandsWhenScrolledToEdge ||
+                    tintAdjustmentMode != controller.presentingViewController.view?.tintAdjustmentMode else {
+                return
+            }
+
+            controller.animateChanges {
+                controller.detents = detents
+
+                if let selectedDetentIdentifier = selectedDetentIdentifier {
+                    controller.selectedDetentIdentifier = selectedDetentIdentifier
                 }
 
-                UIView.animate(withDuration: 0.25) {
-                    if let undimmed = controller.largestUndimmedDetentIdentifier {
-                        controller.presentingViewController.view?.tintAdjustmentMode = (selection?.wrappedValue ?? .large) >= .init(id: .init(rawValue: undimmed.rawValue)) ? .automatic : .normal
-                    } else {
-                        controller.presentingViewController.view?.tintAdjustmentMode = .automatic
-                    }
-                }
+                controller.prefersScrollingExpandsWhenScrolledToEdge = prefersScrollingExpandsWhenScrolledToEdge
+            }
+
+            UIView.animate(withDuration: 0.25) {
+                controller.presentingViewController.view?.tintAdjustmentMode = tintAdjustmentMode
             }
         }
 
