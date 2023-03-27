@@ -109,6 +109,28 @@ private extension Backport where Wrapped == Any {
 }
 
 @available(iOS 15, *)
+private extension Backport.PresentationBackgroundInteraction {
+    var largestUndimmedDetentIdentifier: UISheetPresentationController.Detent.Identifier? {
+        switch interaction {
+        case .automatic, .disabled: return nil
+        case .enabled: return .large
+        case .upThrough(let detent): return .init(detent.id.rawValue)
+        }
+    }
+
+    func tintAdjustmentMode(for controller: UISheetPresentationController) -> UIView.TintAdjustmentMode {
+        switch interaction {
+        case .automatic, .disabled: return .automatic
+        case .enabled: return .normal
+        case .upThrough(let detent):
+            let selectedId = controller.selectedDetentIdentifier ?? .large
+            let selected = Backport<Any>.PresentationDetent(id: .init(rawValue: selectedId.rawValue))
+            return selected > detent ? .dimmed : .normal
+        }
+    }
+}
+
+@available(iOS 15, *)
 private extension Backport.Representable {
     final class Controller: UIViewController, UISheetPresentationControllerDelegate {
         var interaction: Backport<Any>.PresentationBackgroundInteraction
@@ -136,26 +158,21 @@ private extension Backport.Representable {
         func update(interaction: Backport<Any>.PresentationBackgroundInteraction) {
             self.interaction = interaction
 
-            if let controller = parent?.sheetPresentationController {
-                controller.animateChanges {
-                    switch interaction.interaction {
-                    case .automatic:
-                        controller.largestUndimmedDetentIdentifier = nil
-                        controller.presentingViewController.view?.tintAdjustmentMode = .automatic
-                    case .disabled:
-                        controller.largestUndimmedDetentIdentifier = nil
-                        controller.presentingViewController.view?.tintAdjustmentMode = .automatic
-                    case .enabled:
-                        controller.largestUndimmedDetentIdentifier = .large
-                        controller.presentingViewController.view?.tintAdjustmentMode = .normal
-                    case .upThrough(let detent):
-                        controller.largestUndimmedDetentIdentifier = .init(detent.id.rawValue)
+            guard let controller = parent?.sheetPresentationController else {
+                return
+            }
 
-                        let selectedId = controller.selectedDetentIdentifier ?? .large
-                        let selected = Backport<Any>.PresentationDetent(id: .init(rawValue: selectedId.rawValue))
-                        controller.presentingViewController.view?.tintAdjustmentMode = selected > detent ? .dimmed : .normal
-                    }
-                }
+            let largestUndimmedDetentIdentifier = interaction.largestUndimmedDetentIdentifier
+            let tintAdjustmentMode = interaction.tintAdjustmentMode(for: controller)
+
+            guard largestUndimmedDetentIdentifier != controller.largestUndimmedDetentIdentifier ||
+                    tintAdjustmentMode != controller.presentingViewController.view?.tintAdjustmentMode else {
+                return
+            }
+
+            controller.animateChanges {
+                controller.largestUndimmedDetentIdentifier = largestUndimmedDetentIdentifier
+                controller.presentingViewController.view?.tintAdjustmentMode = tintAdjustmentMode
             }
         }
     }

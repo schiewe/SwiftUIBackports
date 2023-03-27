@@ -69,6 +69,16 @@ private extension Backport where Wrapped == Any {
 }
 
 @available(iOS 15, *)
+private extension Backport.PresentationContentInteraction {
+    var prefersScrollingExpandsWhenScrolledToEdge: Bool {
+        switch interaction {
+        case .automatic, .resizes: return true
+        case .scrolls: return false
+        }
+    }
+}
+
+@available(iOS 15, *)
 private extension Backport.Representable {
     final class Controller: UIViewController, UISheetPresentationControllerDelegate {
         var interaction: Backport<Any>.PresentationContentInteraction
@@ -95,15 +105,18 @@ private extension Backport.Representable {
         func update(interaction: Backport<Any>.PresentationContentInteraction) {
             self.interaction = interaction
 
-            if let controller = parent?.sheetPresentationController {
-                controller.animateChanges {
-                    switch interaction.interaction {
-                    case .automatic, .resizes:
-                        controller.prefersScrollingExpandsWhenScrolledToEdge = true
-                    case .scrolls:
-                        controller.prefersScrollingExpandsWhenScrolledToEdge = false
-                    }
-                }
+            guard let controller = parent?.sheetPresentationController else {
+                return
+            }
+
+            let prefersScrollingExpandsWhenScrolledToEdge = interaction.prefersScrollingExpandsWhenScrolledToEdge
+
+            guard prefersScrollingExpandsWhenScrolledToEdge != controller.prefersScrollingExpandsWhenScrolledToEdge else {
+                return
+            }
+
+            controller.animateChanges {
+                controller.prefersScrollingExpandsWhenScrolledToEdge = prefersScrollingExpandsWhenScrolledToEdge
             }
         }
     }
