@@ -87,11 +87,21 @@ private extension Backport.Representable {
         func update(visibility: Backport<Any>.Visibility) {
             self.visibility = visibility
 
-            if let controller = parent?.sheetPresentationController {
-                controller.animateChanges {
-                    controller.prefersGrabberVisible = visibility == .visible
-                    controller.prefersScrollingExpandsWhenScrolledToEdge = true
-                }
+            guard let controller = parent?.sheetPresentationController else {
+                return
+            }
+
+            let prefersGrabberVisible = visibility == .visible
+            let prefersScrollingExpandsWhenScrolledToEdge = true
+
+            guard prefersGrabberVisible != controller.prefersGrabberVisible ||
+                    prefersScrollingExpandsWhenScrolledToEdge != controller.prefersScrollingExpandsWhenScrolledToEdge else {
+                return
+            }
+
+            controller.animateChanges {
+                controller.prefersGrabberVisible = prefersGrabberVisible
+                controller.prefersScrollingExpandsWhenScrolledToEdge = prefersScrollingExpandsWhenScrolledToEdge
             }
         }
 
