@@ -120,6 +120,9 @@ public extension Backport<Any> {
         }
 
         public static func < (lhs: PresentationDetent, rhs: PresentationDetent) -> Bool {
+            if lhs == rhs {
+                return false
+            }
             switch (lhs, rhs) {
             case (.large, .medium):
                 return false
@@ -206,7 +209,7 @@ private extension Backport.Representable {
 
                 UIView.animate(withDuration: 0.25) {
                     if let undimmed = controller.largestUndimmedDetentIdentifier {
-                        controller.presentingViewController.view?.tintAdjustmentMode = (selection?.wrappedValue ?? .large) >= .init(id: .init(rawValue: undimmed.rawValue)) ? .automatic : .normal
+                        controller.presentingViewController.view?.tintAdjustmentMode = (selection?.wrappedValue ?? .large) > .init(id: .init(rawValue: undimmed.rawValue)) ? .automatic : .normal
                     } else {
                         controller.presentingViewController.view?.tintAdjustmentMode = .automatic
                     }
