@@ -206,14 +206,6 @@ private extension Backport.Representable {
 
                     controller.prefersScrollingExpandsWhenScrolledToEdge = true
                 }
-
-                UIView.animate(withDuration: 0.25) {
-                    if let undimmed = controller.largestUndimmedDetentIdentifier {
-                        controller.presentingViewController.view?.tintAdjustmentMode = (selection?.wrappedValue ?? .large) > .init(id: .init(rawValue: undimmed.rawValue)) ? .automatic : .normal
-                    } else {
-                        controller.presentingViewController.view?.tintAdjustmentMode = .automatic
-                    }
-                }
             }
         }
 
