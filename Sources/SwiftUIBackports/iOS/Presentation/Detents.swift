@@ -203,8 +203,6 @@ private extension Backport.Representable {
                     if let selection = selection {
                         controller.selectedDetentIdentifier = .init(selection.wrappedValue.id.rawValue)
                     }
-
-                    controller.prefersScrollingExpandsWhenScrolledToEdge = true
                 }
             }
         }
