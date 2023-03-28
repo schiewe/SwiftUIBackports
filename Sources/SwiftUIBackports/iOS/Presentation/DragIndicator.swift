@@ -88,9 +88,7 @@ private extension Backport.Representable {
             self.visibility = visibility
 
             if let controller = parent?.sheetPresentationController {
-                controller.animateChanges {
-                    controller.prefersGrabberVisible = visibility == .visible
-                }
+                controller.prefersGrabberVisible = visibility == .visible
             }
         }
 

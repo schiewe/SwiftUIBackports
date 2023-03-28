@@ -190,19 +190,17 @@ private extension Backport.Representable {
             self.selection = selection
 
             if let controller = parent?.sheetPresentationController {
-                controller.animateChanges {
-                    controller.detents = detents.sorted().map {
-                        switch $0 {
-                        case .medium:
-                            return .medium()
-                        default:
-                            return .large()
-                        }
+                controller.detents = detents.sorted().map {
+                    switch $0 {
+                    case .medium:
+                        return .medium()
+                    default:
+                        return .large()
                     }
+                }
 
-                    if let selection = selection {
-                        controller.selectedDetentIdentifier = .init(selection.wrappedValue.id.rawValue)
-                    }
+                if let selection = selection {
+                    controller.selectedDetentIdentifier = .init(selection.wrappedValue.id.rawValue)
                 }
             }
         }
